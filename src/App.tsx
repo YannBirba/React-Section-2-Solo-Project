@@ -1,34 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import React, { useEffect } from "react";
+import Travel from "./types/travel";
+import axios from "axios";
+import Header from "./components/Header";
+import TravelCard from "./components/TravelCard";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+    const [travels, setTravels] = React.useState<Travel[] | null>(null);
 
-  return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
-}
+    const fetchTravels = async () => {
+        await axios
+            .get<{ data: Travel[] }>("/data.json")
+            .then((res) => {
+                setTravels(() => res.data.data);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    };
 
-export default App
+    useEffect(() => {
+        fetchTravels();
+    }, [travels]);
+
+    return (
+        <div className="bg-gray-200 h-screen flex justify-center items-center selection:bg-projectOrange selection:text-text">
+            <div className="max-w-[550px] flex flex-col gap-5 text-text bg-white">
+                <Header />
+                <main className="px-8">
+                    {travels &&
+                        travels.map((travel) => (
+                            <>
+                                <TravelCard key={travel.id} {...travel} />
+                                <hr />
+                            </>
+                        ))}
+                </main>
+            </div>
+        </div>
+    );
+};
+
+export default App;
